@@ -84,46 +84,46 @@ Other Side Terminal → Leave unconnected
 #include <SPI.h>
 #include <TMRpcm.h>
 
-#define SD_ChipSelectPin 10 // SD card CS pin
-#define MIC_PIN A0          // Microphone output pin
-#define BUTTON_PIN 2        // Button pin for toggling recording
+#define SD_ChipSelectPin 10 
+#define MIC_PIN A0 
+#define BUTTON_PIN 2  // button pin for toggling recording
 
 TMRpcm audio;
-int audioFileCounter = 0;  // File numbering for recordings
-volatile bool recMode = false; // Recording mode flag
+int audioFileCounter = 0;  // file numbering for recordings
+volatile bool recMode = false;
 
 void setup() {
-  // Initialize Serial for debugging
+  // debug
   Serial.begin(9600);
   delay(2000);
-  Serial.println("Spy Bug with TMRpcm starting...");
+  Serial.println("NodeBug starting...");
 
-  // Initialize SD card
+  // initialize SD card
   if (!SD.begin(SD_ChipSelectPin)) {
-    Serial.println("SD Card initialization failed! Check wiring.");
-    while (1); // Halt if SD card fails
+    Serial.println("SD Card initialization failed!");
+    while (1); 
   }
   Serial.println("SD Card initialized successfully.");
 
-  // Set TMRpcm chip select pin
+  // set TMRpcm chip select pin
   audio.CSPin = SD_ChipSelectPin;
 
-  // Configure pins
+  // configure pins
   pinMode(MIC_PIN, INPUT);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-  // Attach button interrupt
+  // button interrupt
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), toggleRecording, FALLING);
 }
 
 void loop() {
-  // Simulate blinking by sending dummy data to the Serial Monitor
+  // blink when recording
   if (recMode) {
     static unsigned long lastBlinkTime = 0;
 
-    if (millis() - lastBlinkTime >= 1000) { // Every 1000 ms
+    if (millis() - lastBlinkTime >= 1000) { 
       lastBlinkTime = millis();
-      Serial.print("."); // Sends a dot to blink TX LED
+      Serial.print(".");
     }
   }
 }
@@ -131,18 +131,18 @@ void loop() {
 // Interrupt Service Routine (ISR) for button
 void toggleRecording() {
   static unsigned long lastDebounceTime = 0;
-  unsigned long debounceDelay = 200; // 200 ms debounce time
+  unsigned long debounceDelay = 200; // debounce time
 
-  // Debounce button press
+  // debounce button press
   if (millis() - lastDebounceTime > debounceDelay) {
     lastDebounceTime = millis();
-    recMode = !recMode; // Toggle recording mode
+    recMode = !recMode; // toggle recording mode
 
     Serial.print("Recording mode: ");
     Serial.println(recMode ? "ON" : "OFF");
 
     if (recMode) {
-      // Start recording
+      // start recording
       audioFileCounter++;
       Serial.print("Starting recording: ");
       Serial.print(audioFileCounter);
@@ -152,7 +152,7 @@ void toggleRecording() {
       audio.startRecording(fileName.c_str(), 16000, MIC_PIN);
       Serial.println("Recording started.");
     } else {
-      // Stop recording
+      // stop recording
       Serial.print("Stopping recording: ");
       Serial.print(audioFileCounter);
       Serial.println(".wav");
